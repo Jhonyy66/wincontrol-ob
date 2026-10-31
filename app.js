@@ -86,3 +86,49 @@ document.querySelector('label[for=importFile]').onkeydown=e=>{if(e.key==='Enter'
 $('importFile').onchange=async e=>{try{const arr=JSON.parse(await e.target.files[0].text());let c=0;for(const x of arr){if(/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&typeof x.value==='number'){entries[x.date]={date:x.date,value:x.value,note:String(x.note||'')};c++}}save();render();alert(`${c} registro(s) importado(s).`)}catch{alert('Arquivo inválido.')}e.target.value=''};
 
 render();
+
+// ---- tabs ----
+function showTab(t){const c=t==='calc';$('viewDiario').hidden=c;$('viewCalc').hidden=!c;
+  $('tabDiario').classList.toggle('on',!c);$('tabCalc').classList.toggle('on',c);$('tabDiario').setAttribute('aria-selected',!c);$('tabCalc').setAttribute('aria-selected',c);
+  if(c)calc();try{localStorage.setItem('wincontrol.tab',t)}catch{}}
+$('tabDiario').onclick=()=>showTab('diario');$('tabCalc').onclick=()=>showTab('calc');
+
+// ---- calculadora ----
+let mode='simple';
+const num=id=>{const n=parseVal($(id).value);return n===null?0:n};
+const pct=v=>(v>=0?'+':'')+v.toLocaleString('pt-BR',{maximumFractionDigits:2})+'%';
+function setMode(m){mode=m;$('mSimple').classList.toggle('on',m==='simple');$('mGer').classList.toggle('on',m==='ger');
+  $('mSimple').setAttribute('aria-pressed',m==='simple');$('mGer').setAttribute('aria-pressed',m==='ger');
+  $('fSimple').hidden=m!=='simple';$('fGer').hidden=m!=='ger';calc()}
+$('mSimple').onclick=()=>setMode('simple');$('mGer').onclick=()=>setMode('ger');
+function calc(){
+  const cap=Math.max(0,num('cCap')),n=Math.min(600,Math.max(1,Math.round(num('cN')))),ap=Math.max(0,num('cAp'));
+  let rate,unit,risk=0,tpm=0;
+  if(mode==='ger'){
+    risk=num('gRisk')/100;const tpd=num('gTpd'),days=num('gDays'),hit=num('gHit')/100,rr=num('gRR');
+    tpm=days*tpd;const ev=hit*rr-(1-hit);rate=tpm*risk*ev;unit='Mês';
+    $('gFormula').innerHTML=`${days} dias × ${tpd} trades × ${(risk*100).toLocaleString('pt-BR')}% × (${(hit*100).toLocaleString('pt-BR')}% × ${rr.toLocaleString('pt-BR')} − ${((1-hit)*100).toLocaleString('pt-BR')}%)<br>= <b>${pct(rate*100)} ao mês</b> · risco recalculado no início de cada mês`;
+  }else{rate=num('cRate')/100;unit=$('cPer').value==='dia'?'Dia':'Mês'}
+  $('cNLabel').textContent=mode==='ger'?'Nº de meses':`Nº de ${unit==='Dia'?'dias':'meses'}`;
+  const rows=[];let c=cap;
+  for(let i=1;i<=n;i++){const start=c,rv=start*risk,profit=start*rate;c=Math.max(0,start+profit+ap);rows.push({i,start,rv,profit,end:c})}
+  const tot=cap+ap*n,prof=c-tot;
+  $('oFinal').textContent=brl(c);$('oMult').textContent=cap?`${(c/cap).toLocaleString('pt-BR',{maximumFractionDigits:2})}× o capital inicial`:'';
+  $('oProfit').textContent=sgn(prof);$('oProfit').className=prof>=0?'pos':'neg';$('oPct').textContent=tot?pct(prof/tot*100)+' sobre o investido':'';
+  $('oAp').textContent=brl(tot);$('oRate').textContent=`${pct(rate*100)} por ${unit.toLowerCase()}`;
+  const g=mode==='ger';
+  $('cTable').tHead.innerHTML=`<tr><th>${unit}</th><th>Capital início</th>${g?'<th>Risco/trade</th>':''}<th>Lucro</th>${ap?'<th>Aporte</th>':''}<th>Capital final</th></tr>`;
+  $('cTable').tBodies[0].innerHTML=rows.map(r=>`<tr><td>${r.i}</td><td>${brl(r.start)}</td>${g?`<td>${brl(r.rv)}</td>`:''}<td class="${r.profit>=0?'pos':'neg'}">${sgn(r.profit)}</td>${ap?`<td>${brl(ap)}</td>`:''}<td><b>${brl(r.end)}</b></td></tr>`).join('');
+  const pts=[cap,...rows.map(r=>r.end)],mx=Math.max(...pts)||1,X=i=>i/(pts.length-1)*390+5,Y=v=>190-v/mx*175;
+  const line=pts.map((v,i)=>`${X(i)},${Y(v)}`).join(' ');
+  $('cChart').innerHTML=`<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5aa2ff" stop-opacity=".5"/><stop offset="1" stop-color="#5aa2ff" stop-opacity="0"/></linearGradient></defs>
+  ${[.25,.5,.75,1].map(f=>`<line x1="0" x2="400" y1="${Y(mx*f)}" y2="${Y(mx*f)}" stroke="#1d3a75" stroke-width="1" vector-effect="non-scaling-stroke"/>`).join('')}
+  <polygon points="${X(0)},190 ${line} ${X(pts.length-1)},190" fill="url(#cg)"/>
+  <polyline points="${line}" fill="none" stroke="#5aa2ff" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+}
+document.querySelectorAll('#viewCalc input,#viewCalc select').forEach(el=>el.addEventListener('input',calc));
+$('useDiario').onclick=()=>{const all=Object.values(entries);if(!all.length){$('useInfo').textContent='Nenhum registro no diário ainda.';return}
+  const s=all.reduce((a,e)=>a+e.value,0);$('cCap').value=Math.max(0,s).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  $('useInfo').textContent=`Soma de ${all.length} dia(s) registrados: ${sgn(s)}`;calc()};
+try{if(localStorage.getItem('wincontrol.tab')==='calc')showTab('calc')}catch{}
+if(location.hash==='#calc'||location.hash==='#gerenciamento'){showTab('calc');if(location.hash==='#gerenciamento')setMode('ger')}

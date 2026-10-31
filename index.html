@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>WinControl OB</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232f7bff%22/%3E%3Ctext x=%2216%22 y=%2223%22 font-size=%2220%22 font-family=%22Arial%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3EW%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -15,7 +16,12 @@
     <input type="file" id="importFile" accept="application/json" hidden>
   </div>
 </header>
+<nav class="tabs" role="tablist" aria-label="Seções">
+  <button role="tab" id="tabDiario" class="on" aria-selected="true" aria-controls="viewDiario">📅 Diário</button>
+  <button role="tab" id="tabCalc" aria-selected="false" aria-controls="viewCalc">📈 Calculadora</button>
+</nav>
 <main class="wrap">
+<div id="viewDiario" role="tabpanel" aria-labelledby="tabDiario">
   <section class="stats" aria-label="Resumo do mês">
     <div class="card hero"><span>Resultado do mês</span><strong id="sTotal">R$ 0,00</strong><small id="sCount"></small></div>
     <div class="card"><span>Taxa de acerto</span><strong id="sRate">—</strong><small id="sWL"></small></div>
@@ -41,6 +47,46 @@
       <p class="muted" id="chartEmpty">Registre resultados para ver o gráfico.</p>
     </section>
   </div>
+</div>
+<div id="viewCalc" role="tabpanel" aria-labelledby="tabCalc" hidden>
+  <div class="cgrid">
+  <section class="card cform" aria-label="Parâmetros">
+    <h2>Calculadora de Juros Compostos</h2>
+    <div class="seg modes" role="group" aria-label="Modo">
+      <button type="button" id="mSimple" class="on" aria-pressed="true">Taxa fixa</button>
+      <button type="button" id="mGer" aria-pressed="false">Gerenciamento</button>
+    </div>
+    <label for="cCap">Capital inicial (R$)</label>
+    <input id="cCap" inputmode="decimal" value="1.000,00">
+    <button type="button" class="ghost full" id="useDiario">Usar meu capital do diário</button>
+    <small class="muted" id="useInfo"></small>
+    <div id="fSimple">
+      <div class="two"><div><label for="cRate">Taxa (% por período)</label><input id="cRate" inputmode="decimal" value="3"></div>
+      <div><label for="cPer">Período</label><select id="cPer"><option value="mes">Mês</option><option value="dia">Dia</option></select></div></div>
+    </div>
+    <div id="fGer" hidden>
+      <div class="two"><div><label for="gRisk">Risco por trade (%)</label><input id="gRisk" inputmode="decimal" value="2,5"></div>
+      <div><label for="gTpd">Trades por dia</label><input id="gTpd" inputmode="numeric" value="2"></div></div>
+      <div class="two"><div><label for="gDays">Dias de trade / mês</label><input id="gDays" inputmode="numeric" value="20"></div>
+      <div><label for="gHit">Taxa de acerto (%)</label><input id="gHit" inputmode="decimal" value="50"></div></div>
+      <label for="gRR">Risco:Retorno (1:X)</label><input id="gRR" inputmode="decimal" value="2">
+      <p class="formula" id="gFormula"></p>
+    </div>
+    <div class="two"><div><label for="cN" id="cNLabel">Nº de períodos</label><input id="cN" inputmode="numeric" value="12"></div>
+    <div><label for="cAp">Aporte por período (R$)</label><input id="cAp" inputmode="decimal" value="0"></div></div>
+  </section>
+  <section class="cout">
+    <div class="stats s3">
+      <div class="card hero"><span>Valor final</span><strong id="oFinal">—</strong><small id="oMult"></small></div>
+      <div class="card"><span>Lucro total</span><strong id="oProfit">—</strong><small id="oPct"></small></div>
+      <div class="card"><span>Total aportado</span><strong id="oAp">—</strong><small id="oRate"></small></div>
+    </div>
+    <div class="card"><h3>Crescimento do capital</h3><svg id="cChart" viewBox="0 0 400 200" preserveAspectRatio="none" role="img" aria-label="Gráfico de crescimento"></svg></div>
+  </section>
+  </div>
+  <section class="card tablecard"><h3>Evolução por período</h3><div class="tscroll"><table id="cTable"><thead></thead><tbody></tbody></table></div></section>
+  <p class="disc">⚠️ Simulação matemática. Não é garantia de resultado — perdas reais podem ser maiores que o previsto.</p>
+</div>
   <footer>Ferramenta de gerenciamento e registro. Não constitui recomendação financeira.</footer>
 </main>
 <dialog id="dlg" aria-labelledby="dlgTitle">

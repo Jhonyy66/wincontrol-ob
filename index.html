@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WinControl OB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">W</span><div><h1>WinControl <b>OB</b></h1><p>Registro diário de resultados</p></div></div>
+  <div class="actions">
+    <button class="ghost" id="exportBtn" aria-label="Exportar backup em JSON">Exportar</button>
+    <label class="ghost" for="importFile" tabindex="0">Importar</label>
+    <input type="file" id="importFile" accept="application/json" hidden>
+  </div>
+</header>
+<main class="wrap">
+  <section class="stats" aria-label="Resumo do mês">
+    <div class="card hero"><span>Resultado do mês</span><strong id="sTotal">R$ 0,00</strong><small id="sCount"></small></div>
+    <div class="card"><span>Taxa de acerto</span><strong id="sRate">—</strong><small id="sWL"></small></div>
+    <div class="card"><span>Sequência atual</span><strong id="sStreak">—</strong><small>dias consecutivos</small></div>
+    <div class="card"><span>Melhor dia</span><strong class="pos" id="sBest">—</strong><small id="sBestD"></small></div>
+    <div class="card"><span>Pior dia</span><strong class="neg" id="sWorst">—</strong><small id="sWorstD"></small></div>
+  </section>
+  <div class="grid">
+    <section class="card cal" aria-label="Calendário">
+      <div class="calhead">
+        <button class="icon" id="prev" aria-label="Mês anterior">‹</button>
+        <h2 id="monthLabel"></h2>
+        <button class="icon" id="next" aria-label="Próximo mês">›</button>
+        <button class="primary sm" id="todayBtn">Hoje</button>
+      </div>
+      <div class="dow"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>
+      <div class="days" id="days"></div>
+      <div class="legend"><i class="lg pos"></i>Ganho <i class="lg neg"></i>Perda <i class="lg zero"></i>R$ 0 <i class="lg empty"></i>Sem registro</div>
+    </section>
+    <section class="card chart" aria-label="Evolução da banca no mês">
+      <h3>Evolução acumulada</h3>
+      <svg id="chart" viewBox="0 0 400 200" preserveAspectRatio="none" role="img" aria-label="Gráfico de evolução acumulada"></svg>
+      <p class="muted" id="chartEmpty">Registre resultados para ver o gráfico.</p>
+    </section>
+  </div>
+  <footer>Ferramenta de gerenciamento e registro. Não constitui recomendação financeira.</footer>
+</main>
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form method="dialog" id="form">
+    <h3 id="dlgTitle">Resultado do dia</h3>
+    <p class="muted" id="dlgDate"></p>
+    <label for="val">Valor do resultado (R$)</label>
+    <div class="valrow">
+      <div class="seg" role="group" aria-label="Tipo de resultado">
+        <button type="button" id="signPos" class="on" aria-pressed="true">+ Ganho</button>
+        <button type="button" id="signNeg" aria-pressed="false">− Perda</button>
+      </div>
+      <input id="val" inputmode="decimal" autocomplete="off" placeholder="0,00" required>
+    </div>
+    <label for="note">Observação (opcional)</label>
+    <textarea id="note" rows="3" placeholder="Ex.: 5 operações, 4 wins"></textarea>
+    <div class="btns">
+      <button type="button" class="danger" id="delBtn">Excluir</button>
+      <span></span>
+      <button type="button" class="ghost" id="cancelBtn">Cancelar</button>
+      <button type="submit" class="primary">Salvar</button>
+    </div>
+  </form>
+</dialog>
+<script src="app.js"></script>
+</body></html>

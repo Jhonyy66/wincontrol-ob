@@ -105,9 +105,9 @@ function calc(){
   const cap=Math.max(0,num('cCap')),n=Math.min(600,Math.max(1,Math.round(num('cN')))),ap=Math.max(0,num('cAp'));
   let rate,unit,risk=0,tpm=0;
   if(mode==='ger'){
-    risk=num('gRisk')/100;const tpd=num('gTpd'),days=num('gDays'),hit=num('gHit')/100,rr=num('gRR');
-    tpm=days*tpd;const ev=hit*rr-(1-hit);rate=tpm*risk*ev;unit='Mês';
-    $('gFormula').innerHTML=`${days} dias × ${tpd} trades × ${(risk*100).toLocaleString('pt-BR')}% × (${(hit*100).toLocaleString('pt-BR')}% × ${rr.toLocaleString('pt-BR')} − ${((1-hit)*100).toLocaleString('pt-BR')}%)<br>= <b>${pct(rate*100)} ao mês</b> · risco recalculado no início de cada mês`;
+    risk=num('gRisk')/100;const tpd=num('gTpd'),days=num('gDays'),hit=num('gHit')/100,payout=num('gPayout')/100;
+    tpm=days*tpd;const ev=hit*payout-(1-hit);rate=tpm*risk*ev;unit='Mês';
+    $('gFormula').innerHTML=`${days} dias × ${tpd} trades × ${(risk*100).toLocaleString('pt-BR')}% × (${(hit*100).toLocaleString('pt-BR')}% × ${(payout*100).toLocaleString('pt-BR')}% payout − ${((1-hit)*100).toLocaleString('pt-BR')}%)<br>= <b>${pct(rate*100)} ao mês</b> · risco recalculado no início de cada mês`;
   }else{rate=num('cRate')/100;unit=$('cPer').value==='dia'?'Dia':'Mês'}
   $('cNLabel').textContent=mode==='ger'?'Nº de meses':`Nº de ${unit==='Dia'?'dias':'meses'}`;
   const rows=[];let c=cap;
